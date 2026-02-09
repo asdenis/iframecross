@@ -207,7 +207,7 @@ export default function IframeLoader({
           width={width}
           height={height}
           sandbox={sandbox}
-          referrerPolicy="no-referrer"
+          referrerPolicy="same-origin"
           onLoad={handleLoad}
           onError={handleIframeError}
           style={{

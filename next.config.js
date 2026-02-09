@@ -21,7 +21,7 @@ const nextConfig = {
           },
           {
             key: 'Referrer-Policy',
-            value: 'no-referrer',
+            value: 'same-origin',
           },
         ],
       },
