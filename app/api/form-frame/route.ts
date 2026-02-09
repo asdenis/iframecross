@@ -73,47 +73,6 @@ export async function GET(request: NextRequest) {
           };
         })();
       </script></head>`
-    );st html = await response.text();
-    const baseUrl = formUrl.split('?')[0]; // URL base sin parámetros
-
-    // Inyectar base tag y script para interceptar peticiones POST
-    const modifiedHtml = html.replace(
-      '</head>',
-      `<base href="${baseUrl}/">
-      <script>
-        (function() {
-          const originalFetch = window.fetch;
-          const originalXHR = window.XMLHttpRequest;
-          
-          // Interceptar fetch
-          window.fetch = function(...args) {
-            const [resource, config] = args;
-            
-            if (typeof resource === 'string' && resource.includes('ticketsplusform')) {
-              const url = new URL(resource, window.location.origin);
-              const proxyUrl = '/api/form-proxy?' + url.searchParams.toString();
-              
-              return originalFetch(proxyUrl, {
-                ...config,
-                method: config?.method || 'GET',
-              });
-            }
-            
-            return originalFetch(...args);
-          };
-          
-          // Interceptar XMLHttpRequest
-          const XHROpen = originalXHR.prototype.open;
-          originalXHR.prototype.open = function(method, url, ...rest) {
-            if (typeof url === 'string' && url.includes('ticketsplusform')) {
-              const fullUrl = new URL(url, window.location.origin);
-              const proxyUrl = '/api/form-proxy?' + fullUrl.searchParams.toString();
-              return XHROpen.call(this, method, proxyUrl, ...rest);
-            }
-            return XHROpen.call(this, method, url, ...rest);
-          };
-        })();
-      </script></head>`
     );
 
     return new NextResponse(modifiedHtml, {
