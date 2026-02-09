@@ -9,29 +9,13 @@ export default function Home() {
   const [formUrl, setFormUrl] = useState<string>('');
 
   useEffect(() => {
-    // Construir la URL del formulario desde las variables de entorno
-    const baseUrl = process.env.NEXT_PUBLIC_FORM_BASE_URL;
-    const params = process.env.NEXT_PUBLIC_FORM_PARAMS;
-    
-    if (!baseUrl) {
-      debugLogger.error('NEXT_PUBLIC_FORM_BASE_URL no está configurada');
-      return;
-    }
-    
-    if (!params) {
-      debugLogger.error('NEXT_PUBLIC_FORM_PARAMS no está configurada');
-      return;
-    }
-    
-    // Agregar timestamp para evitar caché
-    const timestamp = Date.now();
-    const fullUrl = `${baseUrl}?${params},gx-no-cache=${timestamp}`;
-    setFormUrl(fullUrl);
+    // Usar el endpoint proxy como fuente del iframe
+    const proxyUrl = '/api/form-frame';
+    setFormUrl(proxyUrl);
     
     debugLogger.info('Aplicación inicializada', {
-      baseUrl,
-      paramsLength: params.length,
-      fullUrl: fullUrl.substring(0, 100) + '...' // Solo mostrar los primeros 100 caracteres
+      proxyUrl,
+      debugMode: process.env.NEXT_PUBLIC_DEBUG_MODE,
     });
 
     // Verificar configuración del navegador

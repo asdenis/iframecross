@@ -14,7 +14,7 @@ export default function IframeLoader({
   src, 
   width = '100%', 
   height = '800px',
-  sandbox = 'allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation allow-popups-to-escape-sandbox'
+  sandbox = ''
 }: IframeLoaderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -104,61 +104,10 @@ export default function IframeLoader({
     setIsLoading(false);
     setError(null);
     
-    // Inyectar script para interceptar peticiones POST
-    injectProxyScript();
-    
     // Verificar si el iframe se cargó correctamente
     setTimeout(() => {
       checkIframeContent();
     }, 1000);
-  };
-
-  const injectProxyScript = () => {
-    try {
-      const iframe = iframeRef.current;
-      if (!iframe || !iframe.contentWindow) return;
-
-      const script = iframe.contentWindow.document.createElement('script');
-      script.textContent = `
-        (function() {
-          const originalFetch = window.fetch;
-          const originalXHR = window.XMLHttpRequest;
-          
-          // Interceptar fetch
-          window.fetch = function(...args) {
-            const [resource, config] = args;
-            
-            if (typeof resource === 'string' && resource.includes('ticketsplusform')) {
-              const url = new URL(resource, window.location.origin);
-              const proxyUrl = '/api/form-proxy?' + url.searchParams.toString();
-              
-              return originalFetch(proxyUrl, {
-                ...config,
-                method: config?.method || 'GET',
-              });
-            }
-            
-            return originalFetch(...args);
-          };
-          
-          // Interceptar XMLHttpRequest
-          const XHROpen = originalXHR.prototype.open;
-          originalXHR.prototype.open = function(method, url, ...rest) {
-            if (typeof url === 'string' && url.includes('ticketsplusform')) {
-              const fullUrl = new URL(url, window.location.origin);
-              const proxyUrl = '/api/form-proxy?' + fullUrl.searchParams.toString();
-              return XHROpen.call(this, method, proxyUrl, ...rest);
-            }
-            return XHROpen.call(this, method, url, ...rest);
-          };
-        })();
-      `;
-      
-      iframe.contentWindow.document.head.appendChild(script);
-      debugLogger.info('Script de proxy inyectado en el iframe');
-    } catch (error: any) {
-      debugLogger.warning('No se pudo inyectar script de proxy (CORS esperado)', error.message);
-    }
   };
 
   const handleError = (errorMessage: string) => {
