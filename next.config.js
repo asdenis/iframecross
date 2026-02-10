@@ -9,7 +9,7 @@ const nextConfig = {
         headers: [
           {
             key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
+            value: 'ALLOWALL',
           },
           {
             key: 'Content-Security-Policy',
@@ -21,7 +21,11 @@ const nextConfig = {
           },
           {
             key: 'Referrer-Policy',
-            value: 'same-origin',
+            value: 'no-referrer',
+          },
+          {
+            key: 'Access-Control-Allow-Credentials',
+            value: 'true',
           },
         ],
       },
