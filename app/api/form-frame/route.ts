@@ -35,16 +35,28 @@ export async function GET(request: NextRequest) {
     const html = await response.text();
 
     // Reescribir URLs de recursos para que usen el proxy
-    // Esto cubre: href="/...", src="/...", url(/...), etc.
+    // Solo reescribir URLs que NO estén ya reescritas
     let modifiedHtml = html
-      // URLs absolutas que empiezan con /ticketsplusform/
-      .replace(/(['"])(\/ticketsplusform\/[^'"]*)/g, '$1/api/proxy/ticketsplusform/$2')
+      // URLs absolutas /ticketsplusform/ → /api/proxy/ticketsplusform/
+      .replace(/(['"])(\/ticketsplusform\/)/g, (match, quote, path) => {
+        // Evitar duplicar si ya está reescrito
+        if (match.includes('/api/proxy/')) return match;
+        return `${quote}/api/proxy${path}`;
+      })
+      // URLs relativas static/ → /api/proxy/ticketsplusform/static/
+      .replace(/(['"])(static\/)/g, (match, quote, path) => {
+        if (match.includes('/api/proxy/')) return match;
+        return `${quote}/api/proxy/ticketsplusform/${path}`;
+      })
       // URLs en url() de CSS
-      .replace(/url\((['"]?)\/ticketsplusform\//g, 'url($1/api/proxy/ticketsplusform/')
-      // URLs relativas que empiezan con static/
-      .replace(/(['"])(static\/[^'"]*)/g, '$1/api/proxy/ticketsplusform/$2')
-      // URLs en url() para recursos relativos
-      .replace(/url\((['"]?)(static\/[^'"]*)/g, 'url($1/api/proxy/ticketsplusform/$2');
+      .replace(/url\((['"]?)(\/ticketsplusform\/)/g, (match, quote, path) => {
+        if (match.includes('/api/proxy/')) return match;
+        return `url(${quote}/api/proxy${path}`;
+      })
+      .replace(/url\((['"]?)(static\/)/g, (match, quote, path) => {
+        if (match.includes('/api/proxy/')) return match;
+        return `url(${quote}/api/proxy/ticketsplusform/${path}`;
+      });
 
     // Inyectar script para interceptar peticiones POST
     modifiedHtml = modifiedHtml.replace(
