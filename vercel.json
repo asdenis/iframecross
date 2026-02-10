@@ -13,7 +13,7 @@
       "headers": [
         {
           "key": "X-Frame-Options",
-          "value": "SAMEORIGIN"
+          "value": "ALLOWALL"
         },
         {
           "key": "Content-Security-Policy",
@@ -25,7 +25,11 @@
         },
         {
           "key": "Referrer-Policy",
-          "value": "origin-when-cross-origin"
+          "value": "no-referrer"
+        },
+        {
+          "key": "Access-Control-Allow-Credentials",
+          "value": "true"
         }
       ]
     }
