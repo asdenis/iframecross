@@ -33,13 +33,17 @@ export async function GET(request: NextRequest) {
     }
 
     const html = await response.text();
-    const baseUrl = formUrl.split('?')[0]; // URL base sin parámetros
 
-    // Inyectar base tag y script para interceptar peticiones POST
-    const modifiedHtml = html.replace(
+    // Reescribir URLs de recursos para que usen el proxy
+    let modifiedHtml = html
+      .replace(/href="\/ticketsplusform\//g, 'href="/api/proxy/ticketsplusform/')
+      .replace(/src="\/ticketsplusform\//g, 'src="/api/proxy/ticketsplusform/')
+      .replace(/url\(\/ticketsplusform\//g, 'url(/api/proxy/ticketsplusform/');
+
+    // Inyectar script para interceptar peticiones POST
+    modifiedHtml = modifiedHtml.replace(
       '</head>',
-      `<base href="${baseUrl}/">
-      <script>
+      `<script>
         (function() {
           const originalFetch = window.fetch;
           const originalXHR = window.XMLHttpRequest;
